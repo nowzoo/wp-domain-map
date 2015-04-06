@@ -1,0 +1,21 @@
+{
+  "name": "nowzoo/wp-domain-map",
+  "description": "Simplified domain mapping for WordPress Networks",
+  "license": "MIT",
+  "homepage": "https://github.com/nowzoo/wp-s3",
+  "keywords": ["domain","wordpress"],
+  "authors": [
+    {
+      "name": "Christopher Carson",
+      "email": "chris@nowzoo.com"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "NowZoo\\WPDomainMap\\": "src/"
+    }
+  },
+  "require": {
+    "nowzoo/wp-utils": "0.1.*"
+  }
+}
