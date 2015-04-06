@@ -5,6 +5,7 @@ use NowZoo\WPDomainMap\Plugin;
  * @var bool $error
  * @var string $message
  * @var $sites
+ * @var $ids_to_domains
  */
 ?>
 
@@ -55,27 +56,28 @@ use NowZoo\WPDomainMap\Plugin;
             </thead>
             <tbody>
             <?php
-            foreach($sites as $site){
+            foreach($sites as $id => $site){
+                $id = intval($id);
                 ?>
                 <tr>
                     <td>
-                        <?php echo $site->blog_id?>
+                        <?php echo $id ?>
                     </td>
                     <td>
-                        <label for="<?php echo Plugin::SITE_OPTION_DOMAINS?>_<?php echo $site->blog_id?>">
+                        <label for="<?php echo Plugin::SITE_OPTION_DOMAINS?>_<?php echo $id?>">
                             <?php echo $site->domain?>
                         </label>
 
                     </td>
                     <td>
                         <?php
-                        if (intval($site->blog_id) === BLOG_ID_CURRENT_SITE){
+                        if ($id === BLOG_ID_CURRENT_SITE){
                             ?>
                             Main Site
                             <?php
                         } else {
-                            if (isset($option[$site->blog_id])){
-                                $domain = $option[$site->blog_id];
+                            if (isset($ids_to_domains[$id])){
+                                $domain = $ids_to_domains[$id]['domain'];
                             } else {
                                 $domain = '';
                             }
@@ -85,8 +87,8 @@ use NowZoo\WPDomainMap\Plugin;
                                 type="text"
                                 class="widefat"
                                 placeholder="example.com"
-                                name="<?php echo Plugin::SITE_OPTION_DOMAINS?>[<?php echo $site->blog_id?>]"
-                                id="<?php echo Plugin::SITE_OPTION_DOMAINS?>_<?php echo $site->blog_id?>"
+                                name="<?php echo Plugin::SITE_OPTION_DOMAINS?>[<?php echo $id?>]"
+                                id="<?php echo Plugin::SITE_OPTION_DOMAINS?>_<?php echo $id?>"
                                 value="<?php echo esc_attr($domain)?>"
                                 >
 
@@ -107,5 +109,7 @@ use NowZoo\WPDomainMap\Plugin;
     </form>
 
 </div>
+<pre><?php var_dump($option);?>
+</pre>
 
 

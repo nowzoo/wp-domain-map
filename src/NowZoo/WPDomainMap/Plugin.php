@@ -1,32 +1,58 @@
 <?php
 namespace NowZoo\WPDomainMap;
 
+/**
+ * Class Plugin
+ * @package NowZoo\WPDomainMap
+ *
+ * Shared functionality
+ */
 class Plugin{
 
     const SITE_OPTION_DOMAINS = 'nowzoo-domain-map';
 
-    private static $instance = null;
 
-    public static function inst(){
-        if (is_null(self::$instance)){
-            self::$instance = new Plugin;
-        }
-        return self::$instance;
-    }
-
-    private function __construct(){
-        if (! is_multisite()) return;
-        AdminSettingsPanel::inst();
-
+    /**
+     * @return array
+     */
+    public static function option_default(){
+        return array(
+            'ids_to_domains' => array(),
+            'subdomains_to_domains' => array()
+        );
     }
 
     /**
+     * Get the option before the site id has benn set...
+     *
+     * @return array
+     */
+    public static function get_raw_option(){
+        global $wpdb;
+        /** @var \wpdb $wpdb */
+        $sql = 'SELECT meta_value FROM ' . $wpdb->sitemeta . ' WHERE site_id = %s AND meta_key = %s';
+        $sql = $wpdb->prepare($sql, SITE_ID_CURRENT_SITE, self::SITE_OPTION_DOMAINS);
+        $option = $wpdb->get_var($sql);
+        if ($option){
+            $option = unserialize($option);
+        } else {
+            $option = null;
+        }
+        if (! is_array($option)){
+            $option = self::option_default();
+        }
+        return $option;
+    }
+
+    /**
+     * Get the option in the normal way...
+     *
      * @return array
      */
     public static function get_option(){
         $option = get_site_option(self::SITE_OPTION_DOMAINS);
         if (! is_array($option)){
-            $option = array();
+            $option = self::option_default();
         }
         return $option;
     }
@@ -36,51 +62,34 @@ class Plugin{
      */
     public static function set_option($option){
         if (! is_array($option)){
-            $option = array();
+            $option = self::option_default();
         }
         update_site_option(self::SITE_OPTION_DOMAINS, $option);
 
     }
 
-
-    private function initialize($map, $url_map){
-        global $wpdb, $current_blog, $blog_id, $site_id, $current_site;
+    /**
+     * @return array
+     */
+    public static function get_sites_map(){
+        global $wpdb;
         /** @var \wpdb $wpdb */
-        $this->domain = $_SERVER[ 'HTTP_HOST' ];
-        $this->map = $map;
-        $this->url_map = $url_map;
-        add_action('plugins_loaded', array($this, '_action_plugins_loaded'));
-        if (! isset($this->map[$this->domain])){
-            return;
+        $sites = $wpdb->get_results('SELECT * FROM ' . $wpdb->blogs);
+        if (! is_array($sites)){
+            $sites = array();
         }
-        $this->blog_id = $this->map[$this->domain];
-        $sql = sprintf('SELECT * FROM %s WHERE blog_id =%s', $wpdb->blogs, $this->blog_id);
-        $current_blog = $wpdb->get_row($sql);
-        $current_blog->domain = $_SERVER[ 'HTTP_HOST' ];
-        $current_blog->path = '/';
-        $blog_id = $this->blog_id;
-        $site_id = $current_blog->site_id;
-        define( 'COOKIE_DOMAIN', $_SERVER[ 'HTTP_HOST' ] );
-        $sql = sprintf('SELECT * FROM %s WHERE id =%s', $wpdb->site, $current_blog->site_id);
-        $current_site = $wpdb->get_row($sql);
-        $current_site->blog_id = 1;
-
-    }
-
-    public function _action_plugins_loaded(){
-        add_filter('option_home', array($this, '_filter_url'),  9999, 1);
-        add_filter('option_siteurl', array($this, '_filter_url'),  9999, 1);
-    }
-
-    public function _filter_url($url){
-        $parsed = parse_url($url);
-        if (! isset($this->url_map[$parsed['host']])){
-            return $url;
+        $map = array();
+        foreach($sites as $site){
+            $map[$site->blog_id] = $site;
         }
-        return $parsed['scheme'] . '://' . $this->url_map[$parsed['host']];
+        return $map;
     }
 
 
+    /**
+     * @param bool $p
+     * @return string
+     */
     public static function lib_path($p = false){
         $lib_path = dirname(dirname(dirname(__DIR__)));
         if ($p && ! empty($p)){
@@ -89,6 +98,10 @@ class Plugin{
         return $lib_path;
     }
 
+    /**
+     * @param bool $p
+     * @param array $data
+     */
     public static function require_lib_path($p = false, $data = array()){
         extract($data);
         require self::lib_path($p);
