@@ -31,6 +31,18 @@ class Plugin{
         return $option;
     }
 
+    /**
+     * @return array
+     */
+    public static function set_option($option){
+        if (! is_array($option)){
+            $option = array();
+        }
+        update_site_option(self::SITE_OPTION_DOMAINS, $option);
+
+    }
+
+
     private function initialize($map, $url_map){
         global $wpdb, $current_blog, $blog_id, $site_id, $current_site;
         /** @var \wpdb $wpdb */

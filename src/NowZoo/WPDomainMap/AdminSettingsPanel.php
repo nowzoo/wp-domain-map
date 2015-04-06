@@ -37,7 +37,7 @@ class AdminSettingsPanel {
     public function panel(){
         global $wpdb;
         /** @var \wpdb $wpdb */
-        $sites = $wpdb->query('SELECT * FROM ' . $wpdb->blogs);
+        $sites = $wpdb->get_results('SELECT * FROM ' . $wpdb->blogs);
         $option = Plugin::get_option();
         $error = $this->error;
         $message = $this->message;
@@ -46,24 +46,26 @@ class AdminSettingsPanel {
 
 
     public function action_init(){
-//        if (! is_admin()) return;
-//        if (! isset($_GET['page']) || Plugin::SITE_OPTION_AWS !== $_GET['page']) return;
-//        if (! WPUtils::is_submitting()) return;
-//        if (is_multisite()){
-//            $cap = 'manage_network';
-//        } else {
-//            $cap = 'administrator';
-//        }
-//        if (! current_user_can($cap)) return;
-//
-//        if (! wp_verify_nonce($_POST[Plugin::SITE_OPTION_AWS . '_nonce'], Plugin::SITE_OPTION_AWS) ){
-//            return;
-//        }
-//        $option = WPUtils::trim_stripslashes_deep($_POST[Plugin::SITE_OPTION_AWS]);
-//        $validated = Plugin::validate_aws_option($error, $option);
-//        Plugin::set_aws_option($option, $validated);
-//        $this->message = $validated ? 'AWS S3 options updated!' : $error;
-//        $this->error = ! $validated;
+        if (! is_admin()) return;
+        if (! isset($_GET['page']) || Plugin::SITE_OPTION_DOMAINS !== $_GET['page']) return;
+        if (! WPUtils::is_submitting()) return;
+        $cap = 'manage_network';
+        if (! current_user_can($cap)) return;
+
+        if (! wp_verify_nonce($_POST[Plugin::SITE_OPTION_DOMAINS . '_nonce'], Plugin::SITE_OPTION_DOMAINS) ){
+            return;
+        }
+        $option = WPUtils::trim_stripslashes_deep($_POST[Plugin::SITE_OPTION_DOMAINS]);
+        $saved = array();
+        foreach($option as $site_id => $domain){
+            $domain = trim($domain);
+            $domain = strtolower($domain);
+            if (! empty($domain)){
+                $saved[intval($site_id)] = $domain;
+            }
+        }
+        Plugin::set_option($saved);
+        $this->message = 'Domain settings updated!';
     }
 
 
