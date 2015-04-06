@@ -109,7 +109,6 @@ use NowZoo\WPDomainMap\Plugin;
     </form>
 
 </div>
-<pre><?php var_dump($option);?>
-</pre>
+
 
 
