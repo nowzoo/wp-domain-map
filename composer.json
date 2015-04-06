@@ -2,7 +2,7 @@
   "name": "nowzoo/wp-domain-map",
   "description": "Simplified domain mapping for WordPress Networks",
   "license": "MIT",
-  "homepage": "https://github.com/nowzoo/wp-s3",
+  "homepage": "https://github.com/nowzoo/wp-domain-map",
   "keywords": ["domain","wordpress"],
   "authors": [
     {
