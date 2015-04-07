@@ -88,6 +88,7 @@ class AdminSettingsPanel {
             return;
         }
 
+        $sites = Plugin::get_sites_map();
         $option = WPUtils::trim_stripslashes_deep($_POST[Plugin::SITE_OPTION_DOMAINS]);
         $ids_to_domains = array();
         $subdomains_to_domains = array();
@@ -104,7 +105,11 @@ class AdminSettingsPanel {
 
             }
         }
+
+
         Plugin::set_option(compact('ids_to_domains', 'subdomains_to_domains'));
+
+
         $this->message = 'Domain settings updated!';
     }
 

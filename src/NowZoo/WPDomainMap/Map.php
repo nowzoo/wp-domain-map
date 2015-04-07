@@ -91,6 +91,15 @@ class Map{
     public function action_plugins_loaded(){
         add_filter('option_home', array($this, 'filter_url'),  9999, 1);
         add_filter('option_siteurl', array($this, 'filter_url'),  9999, 1);
+        add_filter('theme_root_uri', array($this, 'filter_theme_root_uri'),  9999, 1);
+    }
+
+    public function filter_theme_root_uri($url){
+        $parsed = parse_url($url);
+        if (! isset($this->subdomains_to_domains[$parsed['host']])){
+            return $url;
+        }
+        return $parsed['scheme'] . '://' . $this->subdomains_to_domains[$parsed['host']] . $parsed['path'];
     }
 
     /**
@@ -101,7 +110,6 @@ class Map{
      */
     public function filter_url($url){
         $parsed = parse_url($url);
-
         if (! isset($this->subdomains_to_domains[$parsed['host']])){
             return $url;
         }
